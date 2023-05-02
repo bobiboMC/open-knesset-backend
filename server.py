@@ -17,22 +17,24 @@ def index():
 def db_tables():
     return {'success': True, 'data' : DB.get_data("SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'")}, 200
 
-@app.route('/members')
-def members_presence():
-    return {'success': True, 'data' : DB.get_data('SELECT * FROM members_presence ORDER BY date DESC')}, 200
-
-@app.route('/discribe')
-def get_discribe():
-    return {'success': True, 'data' : DB.get_discribe('members_presence')}, 200
-    
-@app.route('/members_kns/list')
-def get_members_kns_person_list():
-    status_code=200
-    data=DB.get_data_list("SELECT * FROM members_mk_individual")
+@app.route('/<table_name>/list')
+def get_table_list(table_name):
+    if len(table_name.split(' ')) != 1: #one word only,that is table's name
+        data=ValueError("You must give table's name!")
+        status_code=400
+    else:
+        status_code = 200
+        query = "SELECT * FROM %s"
+        data = DB.get_data_list(query,table_name)
     if isinstance(data, Exception):
         status_code = 404 if str(data)=='No row found' else 400
         return {'success': False, 'data' :str(data)},status_code
     return {'success': True, 'data' :data }, status_code 
+    
+
+@app.route('/discribe')
+def get_discribe():
+    return {'success': True, 'data' : DB.get_discribe('members_presence')}, 200
     
 
 @app.route('/member_kns_by_individual/<int:id>')
