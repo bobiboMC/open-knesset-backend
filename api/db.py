@@ -1,6 +1,8 @@
 from contextlib import contextmanager
 
 import psycopg2
+from psycopg2.extensions import quote_ident
+
 
 from . import config
 from flask import request
@@ -28,7 +30,7 @@ def get_db_cursor():
         
 def get_data(sql):
     with get_db_cursor() as cur:
-        cur.execute(f"{sql} LIMIT 10;")
+        cur.execute(f"{sql} LIMIT 5")
         data = cur.fetchall()
     return data
 
@@ -47,17 +49,16 @@ def get_fully_today_member(query,value):
 
     
 #get list data        
-def get_data_list(start_query):
+def get_data_list(start_query,table_name):
+    table_name=psycopg2.extensions.AsIs(table_name)#so 'table_name'-->table_name will work in query and not throw error for bad syntax
     result=create_query_list(start_query)
     if isinstance(result, Exception):
         return result
     query=result[0]
     values=result[1]
-    print(query)
-    print(values)
     try:
         with get_db_cursor() as cur:
-            cur.execute(query,tuple(values))
+            cur.execute(query,(table_name,)+tuple(values))
             data=cur.fetchall()
             column_names = [desc[0] for desc in cur.description]
             result = [{column_names[i]: value for i, value in enumerate(row)} for row in data]
