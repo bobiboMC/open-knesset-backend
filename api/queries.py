@@ -1,5 +1,5 @@
 def get_member_kns_query(id_field):
-         return f"""
+         return f"""              
                 SELECT 
                     f."{id_field}",
                     f."FirstName",
@@ -15,7 +15,7 @@ def get_member_kns_query(id_field):
                     CASE WHEN ch."mk_individual_id" IS NOT NULL THEN true ELSE false END AS "IsChairPerson",
                     CONCAT('[', STRING_AGG(DISTINCT CONCAT(year, '-', total_attended_hours), ','), ']') AS year_total_hours_attended
                 FROM members_faction_memberships m
-                JOIN members_mk_individual f
+                LEFT JOIN members_mk_individual f
                     ON f."mk_individual_id" = ANY(ARRAY(SELECT jsonb_array_elements_text(m."member_mk_ids")::integer))
                 LEFT JOIN members_mk_individual_committees c
                     ON c."mk_individual_id" = f."mk_individual_id" AND c.finish_date IS NULL
@@ -34,7 +34,12 @@ def get_member_kns_query(id_field):
                   GROUP BY members_presence.mk_id, members_presence.year
                 ) AS members_presence
                 ON f."mk_individual_id" = members_presence.mk_id
-                WHERE m.finish_date = CURRENT_DATE AND f."{id_field}"=%s
+                JOIN (
+                SELECT MAX("finish_date") as finish_date,mk_individual_id
+                FROM members_mk_individual_factions
+                GROUP BY mk_individual_id
+                ) AS max_date ON f.mk_individual_id=max_date.mk_individual_id
+                WHERE f."{id_field}" = %s AND m.finish_date=max_date.finish_date AND f."IsCurrent"=true
                 GROUP BY f."{id_field}", m."faction_name", f."FirstName", f."LastName", f."GenderDesc", f."IsCurrent", f."Email", f."altnames", f."mk_individual_photo", ch."mk_individual_id", kns."knesset_array";
     """
 	
