@@ -5,7 +5,6 @@ def get_member_kns_query(id_field):
                     f."FirstName",
                     f."LastName",
                     f."GenderDesc",
-                    f."IsCurrent",
                     f."Email",
                     f."altnames",
                     f."mk_individual_photo",
@@ -34,8 +33,10 @@ def get_member_kns_query(id_field):
                   GROUP BY members_presence.mk_id, members_presence.year
                 ) AS members_presence
                 ON f."mk_individual_id" = members_presence.mk_id
-                WHERE m.finish_date = CURRENT_DATE AND f."{id_field}"=%s
-                GROUP BY f."{id_field}", m."faction_name", f."FirstName", f."LastName", f."GenderDesc", f."IsCurrent", f."Email", f."altnames", f."mk_individual_photo", ch."mk_individual_id", kns."knesset_array";
+                WHERE f."{id_field}"=%s
+                GROUP BY f."{id_field}", m."faction_name", f."FirstName", f."LastName", f."GenderDesc", f."IsCurrent", f."Email", f."altnames", f."mk_individual_photo", ch."mk_individual_id", kns."knesset_array"
+                ORDER BY m."faction_name" DESC
+                LIMIT 1;
     """
 	
 def get_minister_query(id_field):	
@@ -45,7 +46,6 @@ def get_minister_query(id_field):
                     f."FirstName",
                     f."LastName",
                     f."GenderDesc",
-                    f."IsCurrent",
                     f."Email",
                     f."altnames",
                     f."mk_individual_photo",
