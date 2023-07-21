@@ -49,5 +49,5 @@ docker build -t open-knesset-backend .
 Run:
 
 ```
-docker run --env-file .env -p 8000:80 open-knesset-backend
+docker run --env-file .env -p 8000:8000 open-knesset-backend
 ```
