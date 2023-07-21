@@ -21,7 +21,6 @@ from datetime import datetime
 from datetime import date
 from datetime import time
     
-
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
