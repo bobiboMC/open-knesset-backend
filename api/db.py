@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 def get_settings():
     return config.Settings()
 
-
 def get_db_connection(settings: Annotated[config.Settings, Depends(get_settings)]):
     return psycopg2.connect(
         host=settings.oknesset_db_host,
